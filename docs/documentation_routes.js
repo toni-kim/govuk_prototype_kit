@@ -9,9 +9,15 @@ var express = require('express'),
 
 // Docs index
 router.get('/', function (req, res) {
-  
+  console.log(req);
   res.render('index');
 
+});
+
+router.get('/install', function (req, res) {
+  console.log('hi');
+  url = utils.getLatestRelease();
+  res.render('install', { 'releaseURL' : url });
 });
 
 // Examples - exampes post here

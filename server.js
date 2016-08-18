@@ -145,15 +145,21 @@ if (typeof(routes) != "function"){
   console.log("Warning: the use of bind in routes is deprecated - please check the prototype kit documentation for writing routes.")
   routes.bind(app);
 } else {
-  app.all("/", routes);
+  app.use("/", routes);
 }
+
+// Returns a url to the zip of the latest release on github
+app.get('/prototype-admin/download-latest', function (req, res) {
+  url = utils.getLatestRelease();
+  res.redirect(url);
+});
 
 if (useDocumentation){
   // Create separate router for docs
   app.use("/docs", documentationApp);
 
   // Docs under the /docs namespace
-  documentationApp.all("/", documentationRoutes);
+  documentationApp.use("/", documentationRoutes);
 }
 
 
@@ -177,9 +183,9 @@ app.get(/^\/([^.]+)$/, function (req, res) {
 
 if (useDocumentation){
   // Documentation  routes
-  documentationApp.get(/^\/([^.]+)$/, function (req, res) {
-    utils.matchRoutes(req, res);
-  });
+  // documentationApp.get(/^\/([^.]+)$/, function (req, res) {
+  //   utils.matchRoutes(req, res);
+  // });
 }
 
 
