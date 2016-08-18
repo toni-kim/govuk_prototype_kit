@@ -182,10 +182,10 @@ app.get(/^\/([^.]+)$/, function (req, res) {
 });
 
 if (useDocumentation){
-  // Documentation  routes
-  // documentationApp.get(/^\/([^.]+)$/, function (req, res) {
-  //   utils.matchRoutes(req, res);
-  // });
+  // Documentation routes
+  documentationApp.get(/^\/([^.]+)$/, function (req, res) {
+    utils.matchRoutes(req, res);
+  });
 }
 
 

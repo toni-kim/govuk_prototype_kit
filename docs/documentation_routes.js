@@ -21,8 +21,8 @@ router.get('/install', function (req, res) {
 });
 
 // Examples - exampes post here
-router.post('/examples', function (req, res) {
-  res.redirect('examples');
+router.post('/guides-and-examples', function (req, res) {
+  res.redirect('guides-and-examples');
 });
 
 // Example routes
@@ -45,7 +45,7 @@ router.get('/examples/over-18', function (req, res) {
   if (over18 == "false"){
 
     // redirect to the relevant page
-    res.redirect("/examples/under-18");
+    res.redirect("/docs/examples/under-18");
 
   } else {
 
