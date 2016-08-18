@@ -1,10 +1,12 @@
 var path = require('path'),
     express = require('express'),
     session = require('express-session'),
-    nunjucks = require('express-nunjucks'),
+    nunjucks = require('nunjucks'),
     routes = require(__dirname + '/app/routes.js'),
+    documentationRoutes = require(__dirname + '/docs/documentation_routes.js'),
     favicon = require('serve-favicon'),
     app = express(),
+    documentationApp = express(),
     bodyParser = require('body-parser'),
     browserSync = require('browser-sync'),
     config = require(__dirname + '/app/config.js'),
@@ -29,32 +31,45 @@ if (env === 'production' && useAuth === 'true'){
     app.use(utils.basicAuth(username, password));
 }
 
-// Application settings
-app.set('view engine', 'html');
-app.set('views', [__dirname + '/app/views', __dirname + '/lib/']);
+// Set up App
+var appViews = [__dirname + '/app/views/', __dirname + '/lib/'];
 
-nunjucks.setup({
-  autoescape: true,
-  watch: true,
-  noCache: true
-}, app);
-
-// require core and custom filters, merges to one object
-// and then add the methods to nunjucks env obj
-nunjucks.ready(function(nj) {
-  var coreFilters = require(__dirname + '/lib/core_filters.js')(nj),
-    customFilters = require(__dirname + '/app/filters.js')(nj),
-    filters = Object.assign(coreFilters, customFilters);
-  Object.keys(filters).forEach(function(filterName) {
-    nj.addFilter(filterName, filters[filterName]);
-  });
+var nunjucksAppEnv = nunjucks.configure(appViews, {
+    autoescape: true,
+    express: app,
+    noCache: true,
+    watch: true
 });
+
+// Nunjucks filters
+utils.addNunjucksFilters(nunjucksAppEnv);
+
+// Set views engine
+app.set('view engine', 'html');
+
+// Set up documentation app
+var documentationViews = [__dirname + '/docs/views/', __dirname + '/lib/'];
+
+var nunjucksDocumentationEnv = nunjucks.configure(documentationViews, {
+    autoescape: true,
+    express: documentationApp,
+    noCache: true,
+    watch: true
+});
+// Nunjucks filters
+utils.addNunjucksFilters(nunjucksDocumentationEnv);
+
+// Set views engine
+documentationApp.set('view engine', 'html');
 
 // Middleware to serve static assets
 app.use('/public', express.static(__dirname + '/public'));
 app.use('/public', express.static(__dirname + '/govuk_modules/govuk_template/assets'));
 app.use('/public', express.static(__dirname + '/govuk_modules/govuk_frontend_toolkit'));
 app.use('/public/images/icons', express.static(__dirname + '/govuk_modules/govuk_frontend_toolkit/images'));
+
+// TODO: is this the right way to serve these assets?
+documentationApp.use('/assets/images', express.static(__dirname + '/docs/assets/images'));
 
 // Elements refers to icon folder instead of images folder
 app.use(favicon(path.join(__dirname, 'govuk_modules', 'govuk_template', 'assets', 'images','favicon.ico')));
@@ -109,8 +124,17 @@ if (typeof(routes) != "function"){
   console.log("Warning: the use of bind in routes is deprecated - please check the prototype kit documentation for writing routes.")
   routes.bind(app);
 } else {
-  app.use("/", routes);
+  app.all("/", routes);
 }
+
+
+// Create separate router for docs
+app.use("/docs", documentationApp);
+
+// Docs under the /docs namespace
+documentationApp.all("/", documentationRoutes);
+
+
 
 // Strip .html and .htm if provided
 app.get(/\.html?$/i, function (req, res){
@@ -121,26 +145,16 @@ app.get(/\.html?$/i, function (req, res){
   res.redirect(path);
 });
 
-// auto render any view that exists
+// Auto render any view that exists
+
+// App folder routes get priority
 app.get(/^\/([^.]+)$/, function (req, res) {
+  utils.matchRoutes(req, res);
+});
 
-  var path = (req.params[0]);
-
-  res.render(path, function(err, html) {
-    if (err) {
-      res.render(path + "/index", function(err2, html) {
-        if (err2) {
-          console.log(err);
-          res.status(404).send(err + "<br>" + err2);
-        } else {
-          res.end(html);
-        }
-      });
-    } else {
-      res.end(html);
-    }
-  });
-
+// Documentation  routes
+documentationApp.get(/^\/([^.]+)$/, function (req, res) {
+  utils.matchRoutes(req, res);
 });
 
 console.log("\nGOV.UK Prototype kit v" + releaseVersion);
