@@ -5,7 +5,7 @@
 module.exports = {
 
   // Service name used in header. Eg: 'Renew your passport'
-  serviceName: "Service name goes here",
+  serviceName: 'Service name goes here',
 
   // Default port that prototype runs on
   port: '3000',
@@ -22,5 +22,5 @@ module.exports = {
   // Cookie warning - update link to service's cookie page.
   cookieText: 'GOV.UK uses cookies to make the site simpler. <a href="#" title="Find out more about cookies">Find out more about cookies</a>'
 
-};
-	
+}
+

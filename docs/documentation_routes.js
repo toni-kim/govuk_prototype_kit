@@ -1,78 +1,67 @@
 var express = require('express'),
-    fs      = require('fs'),
-    marked  = require('marked'),
-    path    = require('path'),
-    router  = express.Router(),
-    utils   = require(__dirname + '/../lib/utils.js');
-
+  fs = require('fs'),
+  marked = require('marked'),
+  path = require('path'),
+  router = express.Router(),
+  utils = require(__dirname + '/../lib/utils.js')
 
 // Page routes
 
 // Docs index
 router.get('/', function (req, res) {
-  
-  res.render('index');
-
-});
+  res.render('index')
+})
 
 router.get('/install', function (req, res) {
-  console.log('hi');
-  url = utils.getLatestRelease();
-  res.render('install', { 'releaseURL' : url });
-});
+  console.log('hi')
+  url = utils.getLatestRelease()
+  res.render('install', { 'releaseURL': url })
+})
 
 // Pages in install folder are markdown
 router.get('/install/:page', function (req, res) {
-  redirectMarkdown(req.params.page, res);
-  var doc = fs.readFileSync(path.join(__dirname + '/documentation/install/' + req.params.page + ".md"), "utf8");
-  var html = marked(doc);
-  res.render("install_template", {"document": html});
-});
+  redirectMarkdown(req.params.page, res)
+  var doc = fs.readFileSync(path.join(__dirname + '/documentation/install/' + req.params.page + '.md'), 'utf8')
+  var html = marked(doc)
+  res.render('install_template', {'document': html})
+})
 
 // Examples - exampes post here
 router.post('/tutorials-and-examples', function (req, res) {
-  res.redirect('tutorials-and-examples');
-});
+  res.redirect('tutorials-and-examples')
+})
 
 // Example routes
 
 // Passing data into a page
 
 router.get('/examples/template-data', function (req, res) {
-
-  res.render('examples/template-data', { 'name' : 'Foo' });
-
-});
+  res.render('examples/template-data', { 'name': 'Foo' })
+})
 
 // Branching
 
 router.get('/examples/over-18', function (req, res) {
-
   // get the answer from the query string (eg. ?over18=false)
-  var over18 = req.query.over18;
+  var over18 = req.query.over18
 
-  if (over18 == "false"){
-
+  if (over18 == 'false') {
     // redirect to the relevant page
-    res.redirect("/docs/examples/under-18");
-
+    res.redirect('/docs/examples/under-18')
   } else {
-
     // if over18 is any other value (or is missing) render the page requested
-    res.render('examples/over-18');
-
+    res.render('examples/over-18')
   }
+})
 
-});
-
-module.exports = router;
+module.exports = router
 
 // Strip off markdown extensions if present and redirect
-var redirectMarkdown = function (requestedPage, res){
-  if (requestedPage.slice(-3).toLowerCase() == ".md"){
-    res.redirect(requestedPage.slice(0, -3));
+var redirectMarkdown = function (requestedPage, res) {
+  if (requestedPage.slice(-3).toLowerCase() == '.md') {
+    res.redirect(requestedPage.slice(0, -3))
   }
-  if (requestedPage.slice(-9).toLowerCase() == ".markdown"){
-    res.redirect(requestedPage.slice(0, -9));
+  if (requestedPage.slice(-9).toLowerCase() == '.markdown') {
+    res.redirect(requestedPage.slice(0, -9))
   }
-};
+}
